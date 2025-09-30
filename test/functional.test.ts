@@ -186,6 +186,5 @@ describe('your code', () => {
       createdAt: expect.any(String),
       id: expect.any(String),
     });
-
   });
 });
