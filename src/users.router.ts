@@ -72,6 +72,13 @@ export function getUserRouter(db: Db): Router {
    * /users:
    *   get:
    *     summary: Retrieve all users
+   *     parameters:
+   *       - in: query
+   *         name: created
+   *         schema:
+   *           type: string
+   *           enum: [desc, asc]
+   *         description: Sort users by creation date (desc = newest first, asc = oldest first)
    *     responses:
    *       200:
    *         description: List of users
@@ -84,7 +91,16 @@ export function getUserRouter(db: Db): Router {
    */
   router.get('/users', async (req: Request, res: Response) => {
     const userCollection: Collection<UserDocument> = db.collection('users');
-    const users: WithId<UserDocument>[] = await userCollection.find({}).toArray();
+    const { created } = req.query;
+
+    let sortOptions = {};
+    if (created === 'asc') {
+      sortOptions = { createdAt: 1 };
+    } else if (created === 'desc') {
+      sortOptions = { createdAt: -1 };
+    }
+
+    const users: WithId<UserDocument>[] = await userCollection.find({}).sort(sortOptions).toArray();
 
     res.status(200).json(
       users.map((user: UserDocument) => ({

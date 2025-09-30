@@ -146,4 +146,46 @@ describe('your code', () => {
       id: expect.any(String),
     });
   });
+
+  test('listing created users sorted DESC by creation date ', async () => {
+    // create users in specific order
+    await supertest(`http://localhost:${PORT}`)
+      .post('/users')
+      .set('Content-Type', 'application/json')
+      .send({ email: 'first-user@test.co', fullname: 'First User' })
+      .expect('Content-Type', /json/)
+      .expect(201);
+
+    // wait a bit to ensure different creation timestamps
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    await supertest(`http://localhost:${PORT}`)
+      .post('/users')
+      .set('Content-Type', 'application/json')
+      .send({ email: 'second-user@test.co', fullname: 'Second User' })
+      .expect('Content-Type', /json/)
+      .expect(201);
+
+    const response = await supertest(`http://localhost:${PORT}`)
+      .get('/users?created=desc')
+      .expect('Content-Type', /json/)
+      .expect(200);
+
+    expect(response.body.length).toEqual(2);
+    // 2nd user should be first in the list
+    expect(response.body[0]).toEqual({
+      fullname: 'Second User',
+      email: 'second-user@test.co',
+      createdAt: expect.any(String),
+      id: expect.any(String),
+    });
+    // 1st user should be second in the list
+    expect(response.body[1]).toEqual({
+      fullname: 'First User',
+      email: 'first-user@test.co',
+      createdAt: expect.any(String),
+      id: expect.any(String),
+    });
+
+  });
 });
