@@ -19,7 +19,7 @@ export async function connectToDb({
     }
 
     console.log(`Connecting to MongoDB at: ${uri}`);
-    
+
     client = new MongoClient(uri);
     await client.connect();
 

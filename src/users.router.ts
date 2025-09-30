@@ -9,6 +9,16 @@ interface UserDocument extends Document {
   createdAt: Date;
 }
 
+export async function ensureIndexes(db: Db) {
+  const userCollection: Collection<UserDocument> = db.collection('users');
+
+  // for sorting by creation date (newest first)
+  await userCollection.createIndex({ createdAt: -1 });
+
+  // ensuring emails are unique among users
+  await userCollection.createIndex({ email: 1 }, { unique: true });
+}
+
 export function getUserRouter(db: Db): Router {
   const router = Router();
 
@@ -49,8 +59,7 @@ export function getUserRouter(db: Db): Router {
       });
     } catch (error) {
       if (error instanceof MongoServerError && error.code === MONGO_DUPLIACATE_KEY_ERROR_CODE) {
-        // MongoDB duplicate key error
-        return res.status(409).json({ message: 'User with this email already exists.' });
+        return res.status(409).json({ message: 'User with provided email already exists.' });
       }
 
       // let express error middleware handle unexpected errors

@@ -4,7 +4,7 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import * as OpenApiValidator from 'express-openapi-validator';
 
 import { Config } from './config';
-import { getUserRouter } from './users.router';
+import { getUserRouter, ensureIndexes } from './users.router';
 import * as MongoClient from './mongo';
 
 // OpenAPI specification
@@ -59,6 +59,8 @@ export async function createApp(config: Config): Promise<Express> {
     uri: config.mongo.uri,
     dbName: config.mongo.dbName,
   });
+
+  await ensureIndexes(db);
 
   app.use('/', getUserRouter(db));
 

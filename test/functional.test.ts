@@ -54,7 +54,7 @@ afterEach(async () => {
   await db.collection('users').deleteMany({});
 });
 
-describe.only('your code', () => {
+describe('your code', () => {
   test('listing empty users collection', async () => {
     const response = await supertest(`http://localhost:${PORT}`)
       .get('/users')
@@ -95,7 +95,25 @@ describe.only('your code', () => {
       .expect(201);
   });
 
-  test.only('listing created users - I can see my writes', async () => {
+  test('return 409 when attemp to creat user with duplicated email', async () => {
+    await supertest(`http://localhost:${PORT}`)
+      .post('/users')
+      .set('Content-Type', 'application/json')
+      .send({ email: 'my-email@test.co', fullname: 'My Name' })
+      .expect('Content-Type', /json/)
+      .expect(201);
+
+    const response = await supertest(`http://localhost:${PORT}`)
+      .post('/users')
+      .set('Content-Type', 'application/json')
+      .send({ email: 'my-email@test.co', fullname: 'My Name' })
+      .expect('Content-Type', /json/)
+      .expect(409);
+
+    expect(response.body.message).toEqual(`User with provided email already exists.`);
+  });
+
+  test('listing created users - I can see my writes', async () => {
     await supertest(`http://localhost:${PORT}`)
       .post('/users')
       .set('Content-Type', 'application/json')
