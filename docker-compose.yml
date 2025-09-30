@@ -1,0 +1,16 @@
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: mongodb-7
+    ports:
+      - "27017:27017"
+    environment:
+      # Optional: set up a root user for security
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      # Optional: persist data
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
